@@ -44,18 +44,44 @@ big_boi cast_int(void *a, uint8_t size){
 }
 
 uint8_t add_byte(uint8_t a, uint8_t b, uint8_t *c_in){
-  uint16_t temp = ((uint16_t) a) + ((uint16_t) + b) + ((uint16_t) *c_in);
+  uint16_t temp = ((uint16_t) a) + ((uint16_t) b) + ((uint16_t) *c_in);
 
   uint8_t out = temp;
  
   uint16_t temp_c_in = temp >> 8;
-  *c_in =  temp_c_in;
+  *c_in = temp_c_in;
 
   return out;
 }
 
 big_boi multiply_boi(big_boi a, big_boi b){
+  uint16_t temp = 0;
 
+  uint8_t zero = 0;
+
+  big_boi out = cast_int(&zero, 1);
+  uint8_t *out_pointer = &out;
+
+  big_boi temp_boi = cast_int(&zero, 1);
+
+  uint8_t overflow = 0;
+
+  uint8_t *a_pointer = &a;
+  uint8_t *b_pointer = &b;
+
+  for(uint16_t i = 0; i < 1023; ++i){
+    for(uint16_t j = 0; i < 1023; ++i){
+      temp = (*(a_pointer + j)) * (*(b_pointer + i));
+
+      uint8_t left_byte = (temp & 0xFF00) >> 8;
+      uint8_t right_byte = temp & 0x00FF;
+
+      *(out_pointer + j) = add_byte(*(out_pointer + j), right_byte, &overflow);
+      *(out_pointer + j + 1) = add_byte(*(out_pointer + j + 1), left_byte, &overflow);      
+    }
+  }
+
+  return out;
 }
 
 big_boi add_boi(big_boi a, big_boi b){
@@ -205,19 +231,19 @@ void print_boi(big_boi a){
 
 
 void main(void){
-  uint64_t a = 1;
+  uint8_t one = 1;
+  uint8_t two = 2;
+
   uint16_t min = 1;
   uint16_t max = 64;
-
-  for(uint64_t i = 1; i <= min; ++i){
-    a *= 2;
-  }
   
+  big_boi a = cast_int(&one, 1);
+  big_boi b = cast_int(&two, 1);
+
   for(uint64_t i = min; i <= max; ++i){
-    printf("%u = ", i);
-    print_boi(cast_int(&a, 8));
+    a = multiply_boi(a, b);
+    print_boi(a);
     printf("\n");
-    a *= 2;
   }
 
   return;
